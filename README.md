@@ -30,3 +30,7 @@ data: [DONE]
 - **choices (merged)**：所有 delta 合并后的完整 choices 数组
 - **tool_call arguments (parsed)**：工具调用参数的解析结果（如适用）
 - **content (text)**：纯文本内容（如适用）
+
+## 效果
+
+![](./image.png)
