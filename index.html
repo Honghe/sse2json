@@ -231,6 +231,29 @@
     .chunk-text { color: #94a3b8; word-break: break-all; }
     .chunk-text.has-data { color: #2563eb; }
     .chunk-text.is-done { color: #7c3aed; }
+
+    .divider {
+      width: 5px;
+      background: #e2e8f0;
+      cursor: col-resize;
+      flex-shrink: 0;
+      position: relative;
+      transition: background 0.15s;
+    }
+    .divider:hover, .divider.dragging {
+      background: #7c3aed;
+    }
+    .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 1px;
+      height: 32px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 1px;
+    }
   </style>
 </head>
 <body>
@@ -242,7 +265,7 @@
 
 <div class="main">
   <!-- Left: input -->
-  <div class="panel" style="max-width: 52%;">
+  <div class="panel" id="panelLeft" style="flex-basis: 40%; flex-grow: 0; flex-shrink: 0;">
     <div class="panel-header">
       <span>SSE 输入</span>
       <div style="display:flex;gap:6px;">
@@ -261,8 +284,11 @@ data: [DONE]"></textarea>
     </div>
   </div>
 
+  <!-- Divider -->
+  <div class="divider" id="divider"></div>
+
   <!-- Right: output -->
-  <div class="panel">
+  <div class="panel" id="panelRight">
     <div class="tabs">
       <div class="tab active" data-tab="result">解析结果</div>
       <div class="tab" data-tab="raw">原始 chunks</div>
@@ -582,6 +608,41 @@ document.querySelectorAll('.tab').forEach(tab => {
 document.getElementById('input').addEventListener('paste', () => {
   setTimeout(() => document.getElementById('btnConvert').click(), 50);
 });
+
+// ---------- resizable divider ----------
+(function () {
+  const divider = document.getElementById('divider');
+  const left = document.getElementById('panelLeft');
+  const main = document.querySelector('.main');
+  let dragging = false;
+  let startX = 0;
+  let startBasis = 0;
+
+  divider.addEventListener('mousedown', e => {
+    dragging = true;
+    startX = e.clientX;
+    startBasis = left.getBoundingClientRect().width;
+    divider.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const totalW = main.getBoundingClientRect().width;
+    const newBasis = Math.min(Math.max(startBasis + (e.clientX - startX), 160), totalW - 160);
+    left.style.flexBasis = newBasis + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    divider.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+})();
 </script>
 
 </body>
